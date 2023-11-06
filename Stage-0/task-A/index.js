@@ -5,9 +5,23 @@ class Vertex {
     }
 }
 
-function getNumberOfUpgoingPaths(n, grid) {
-    // your code goes here
-    return 0;
+class MinMax {
+    constructor(min, max) {
+        this.min = min;
+        this.max = max;
+    }
+}
+
+function buildSegmentTree(n, numberLine) {
+    // TODO
+}
+
+function printQueriesResult(m, queries) {
+    // TODO
+
+    for (let i = 0; i < m; i++) {
+        console.log("result");
+    }
 }
 
 const _readline = require("readline");
@@ -28,10 +42,15 @@ process.stdin.on("end", solve);
 function solve() {
     const firsLine = readArray();
     const n = firsLine[0];
-    const v = firsLine[1];
-    const grid = readEdges(v);
-    const ans = getNumberOfUpgoingPaths(n, grid);
-    console.log(ans);
+    const m = firsLine[1];
+    const numberLine = readArray();
+
+    const size = Math.pow(2, Math.ceil(Math.log2(n)));
+    const tree = [];
+    const segTree = buildSegmentTree(n, numberLine);
+
+    const queries = readEdges(m);
+    printQueriesResult(m, queries);
 }
 
 function readInt() {
