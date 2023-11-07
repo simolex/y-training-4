@@ -24,26 +24,26 @@
  * функцию для реализации сортировки.
  */
 
-function merge(n, a, m, b) {
-    let PointerA = 0;
-    let PointerB = 0;
+function merge(l1, r1, l2, r2, a, l0, b) {
+    let PointerA = l1;
+    let PointerB = l2;
 
-    const c = Array(n + m);
-    for (let i = 0; i < m + n; i++) {
-        if (PointerA < n && PointerB === m) {
+    const c = b;
+    for (let i = l0; i < r1 + r2 - l1 - l2; i++) {
+        if (PointerA < r1 && PointerB === r2) {
             c[i] = a[PointerA];
             PointerA++;
         }
-        if (PointerA === n && PointerB < m) {
-            c[i] = b[PointerB];
+        if (PointerA === r1 && PointerB < r2) {
+            c[i] = a[PointerB];
             PointerB++;
         }
-        if (PointerA < n && PointerB < m) {
-            if (a[PointerA] <= b[PointerB]) {
+        if (PointerA < r1 && PointerB < r2) {
+            if (a[PointerA] <= a[PointerB]) {
                 c[i] = a[PointerA];
                 PointerA++;
             } else {
-                c[i] = b[PointerB];
+                c[i] = a[PointerB];
                 PointerB++;
             }
         }
@@ -51,10 +51,19 @@ function merge(n, a, m, b) {
     return c;
 }
 
+function solver(n, a, m, b) {
+    a1 = a.concat(b);
+    b2 = Array(n + m);
+
+    const result = merge(0, n, n, n + m, a1, 0, b2);
+    console.log(b2);
+    return result;
+}
+
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin,
+    input: process.stdin
 });
 
 const _inputLines = [];
@@ -76,8 +85,7 @@ function solve() {
     } else {
         b = readArray();
     }
-
-    const result = merge(n, a, m, b);
+    const result = solver(n, a, m, b);
     n + m === 0 ? "" : console.log(result.join(" "));
 }
 
@@ -96,4 +104,4 @@ function readArray() {
     return arr;
 }
 
-module.exports = merge;
+module.exports = solver;
