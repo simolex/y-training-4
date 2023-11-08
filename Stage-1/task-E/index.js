@@ -36,7 +36,8 @@ function getPhase(n, a, m) {
     }
     for (let j = 0; j < n; j++) {
         const index = a[j].length - m;
-        p[a[j].substring(index, index + 1)].push(a[j]);
+        const basket = index < 0 ? 0 : a[j].substring(index, index + 1);
+        p[basket].push(a[j]);
     }
 
     console.log("Phase " + m);
@@ -66,7 +67,7 @@ function sort(n, a, max) {
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin,
+    input: process.stdin
 });
 
 const _inputLines = [];
