@@ -29,53 +29,44 @@
  * по ним для каждой фазы и отсортированный массив. Следуйте формату, приведенному в примере.
  */
 
-// function merge(l1, r1, l2, r2, a, l0, b) {
-//     let PointerA = l1;
-//     let PointerB = l2;
-
-//     const c = b;
-//     for (let i = l0; i < l0 + r1 + r2 - l1 - l2; i++) {
-//         if (PointerA < r1 && PointerB === r2) {
-//             c[i] = a[PointerA];
-//             PointerA++;
-//         }
-//         if (PointerA === r1 && PointerB < r2) {
-//             c[i] = a[PointerB];
-//             PointerB++;
-//         }
-//         if (PointerA < r1 && PointerB < r2) {
-//             if (a[PointerA] <= a[PointerB]) {
-//                 c[i] = a[PointerA];
-//                 PointerA++;
-//             } else {
-//                 c[i] = a[PointerB];
-//                 PointerB++;
-//             }
-//         }
-//     }
-//     return c;
-// }
-
-// function sortWrapper(l, r, index, buffer) {
-//     const m = l + Math.floor((r - l) / 2);
-//     const nextIndex = (index + 1) % 2;
-//     if (m - l > 1) sortWrapper(l, m, nextIndex, buffer);
-//     if (r - m > 1) sortWrapper(m, r, nextIndex, buffer);
-//     return merge(l, m, m, r, buffer[nextIndex], l, buffer[index]);
-// }
-
-function sort(n, a) {
-    const b = [];
-    for (let i = 0; i < 2; i++) {
-        b[i] = [].concat(a);
+function getPhase(n, a, m) {
+    const p = [];
+    for (let i = 0; i < 10; i++) {
+        p[i] = [];
     }
-    return sortWrapper(0, n, 0, b);
+    for (let j = 0; j < n; j++) {
+        const index = a[j].length - m;
+        p[a[j].substring(index, index + 1)].push(a[j]);
+    }
+
+    console.log("Phase " + m);
+    for (let i = 0; i < 10; i++) {
+        console.log("Bucket " + i + ": " + (p[i].length > 0 ? p[i].join(", ") : "empty"));
+    }
+    console.log("**********");
+
+    return p.flat();
+}
+
+function sort(n, a, max) {
+    console.log("Initial array:");
+    console.log(a.join(", "));
+    console.log("**********");
+
+    let r = a;
+    for (let i = 0; i < max; i++) {
+        r = getPhase(n, r, i + 1);
+    }
+
+    console.log("Sorted array:");
+    console.log(r.join(", "));
+    return r;
 }
 
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin
+    input: process.stdin,
 });
 
 const _inputLines = [];
@@ -89,17 +80,27 @@ process.stdin.on("end", solve);
 
 function solve() {
     const n = readInt();
-    const a = readArray();
+    const a = [];
+    let max = 0;
+    for (let i = 0; i < n; i++) {
+        const s = readString();
+        max = Math.max(max, s.length);
+        a.push(s);
+    }
 
-    const result = sort(n, a);
-
-    n === 0 ? "" : console.log(result.join(" "));
+    sort(n, a, max);
 }
 
 function readInt() {
     const n = Number(_inputLines[_curLine]);
     _curLine++;
     return n;
+}
+
+function readString() {
+    const s = _inputLines[_curLine].trim();
+    _curLine++;
+    return s;
 }
 
 function readArray() {
