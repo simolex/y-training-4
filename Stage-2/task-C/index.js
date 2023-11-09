@@ -12,9 +12,9 @@
  * Выведите N чисел — значения z-функции для каждой позиции, разделённые пробелом.
  */
 const hashSettings = [
-    { xValue: 257, pMod: 10 ** 8 + 37 },
-    { xValue: 263, pMod: 10 ** 8 + 7 },
-    { xValue: 269, pMod: 10 ** 8 + 39 },
+    { xValue: 257, pMod: 10 ** 7 + 19 },
+    { xValue: 263, pMod: 10 ** 7 + 79 },
+    { xValue: 269, pMod: 10 ** 7 + 103 }
 ];
 
 function lengthBasedString(s) {
@@ -51,7 +51,7 @@ function lengthBasedString(s) {
         let r = len - from + 1;
         let m;
         while (l < r) {
-            m = Math.floor((l + r + 1) / 2);
+            m = Math.ceil((l + r) / 2);
             if (isEqual(0, from, m)) {
                 l = m;
             } else {
@@ -65,23 +65,24 @@ function lengthBasedString(s) {
     const sArr = s.split("");
     for (let i = 1; i <= len; i++) {
         for (let j = 0; j < countSettings; j++) {
-            h[j][i] =
-                (h[j][i - 1] * xValue[j] + (sArr[i].charCodeAt(0) - "0".charCodeAt(0))) % pMod[j];
+            h[j][i] = (h[j][i - 1] * xValue[j] + (sArr[i].charCodeAt(0) & 255)) % pMod[j];
             x[j][i] = (x[j][i - 1] * xValue[j]) % pMod[j];
         }
     }
 
     const zFunction = [0];
 
-    for (let i = 1; i < len; i++) {}
+    for (let i = 1; i < len; i++) {
+        zFunction.push(maxEqualString(i));
+    }
 
-    return maxBase;
+    return zFunction;
 }
 
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin,
+    input: process.stdin
 });
 
 const _inputLines = [];
@@ -97,7 +98,7 @@ function solve() {
     const s = readString();
 
     const result = lengthBasedString(s);
-    console.log(result);
+    console.log(result.join(" "));
 }
 
 function readInt() {
