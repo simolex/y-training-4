@@ -1,11 +1,11 @@
 const solution = require(".");
 
-describe("E. Поразрядная сортировка", () => {
+describe("Задача: A.Равенство подстрок", () => {
     test("test-1", () => {
         const result = solution("acabaca", 3, [
             [4, 3, 2],
             [3, 4, 0],
-            [2, 0, 1]
+            [2, 0, 1],
         ]);
         expect(result).toEqual(["no", "yes", "no"]);
     });
@@ -20,7 +20,7 @@ describe("E. Поразрядная сортировка", () => {
             [9, 8, 8],
             [19, 0, 0],
             [19, 0, 0],
-            [6, 7, 13]
+            [6, 7, 13],
         ]);
         expect(result).toEqual(["no", "no", "no", "no", "no", "no", "yes", "yes", "yes", "no"]);
     });

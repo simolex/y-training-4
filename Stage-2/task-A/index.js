@@ -19,13 +19,14 @@ function equalSubstrings(s, n, queries) {
     const h = [0];
     const x = [1];
 
-    const xValue = 257; //263           //269       //271       //277
-    const pMod = 1000003; //1000033     //1000037   //1000039   //1000081
+    const xValue = 257;
+    const pMod = 10 ** 8 + 7;
     //TODO need multiTest
 
     const isEqual = (from_1, from_2, subLen) => {
         return (
-            (h[from_1 + subLen] + h[from_2] * x[subLen]) % pMod === (h[from_2 + subLen] + h[from_1] * x[subLen]) % pMod
+            (h[from_1 + subLen] + h[from_2] * x[subLen]) % pMod ===
+            (h[from_2 + subLen] + h[from_1] * x[subLen]) % pMod
         );
     };
 
@@ -42,7 +43,7 @@ function equalSubstrings(s, n, queries) {
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin
+    input: process.stdin,
 });
 
 const _inputLines = [];
