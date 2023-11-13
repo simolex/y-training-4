@@ -18,10 +18,10 @@
 
 function isRightSetOfBracket(s) {
     const stack = [];
-    let ptrStack = 0;
     const sArr = s.split("");
+    let ptrStack = 0;
     let noFail = true;
-    for (let i = 0; i < s.length && noFail; i++) {
+    for (let i = 0; i < s.length && noFail && ptrStack >= 0; i++) {
         switch (s[i]) {
             case "(":
             case "[":
@@ -30,26 +30,32 @@ function isRightSetOfBracket(s) {
                 ptrStack++;
                 break;
             case ")":
-                if (ptrStack > 0 && stack[ptrStack - 1] !== "(") noFail = false;
+                if (ptrStack > 0 && stack[ptrStack - 1] !== "(") {
+                    noFail = false;
+                }
                 ptrStack--;
                 break;
             case "]":
-                if (ptrStack > 0 && stack[ptrStack - 1] !== "[") noFail = false;
+                if (ptrStack > 0 && stack[ptrStack - 1] !== "[") {
+                    noFail = false;
+                }
                 ptrStack--;
                 break;
             case "}":
-                if (ptrStack > 0 && stack[ptrStack - 1] !== "{") noFail = false;
+                if (ptrStack > 0 && stack[ptrStack - 1] !== "{") {
+                    noFail = false;
+                }
                 ptrStack--;
                 break;
         }
     }
-    return noFail ? "yes" : "no";
+    return noFail && ptrStack === 0 ? "yes" : "no";
 }
 
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin,
+    input: process.stdin
 });
 
 const _inputLines = [];

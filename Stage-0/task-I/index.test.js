@@ -9,4 +9,12 @@ describe("I. Правильная скобочная последователь�
         const result = solution("([)]");
         expect(result).toEqual("no");
     });
+    test("test-3", () => {
+        const result = solution("([");
+        expect(result).toEqual("no");
+    });
+    test("test-4", () => {
+        const result = solution("())(()");
+        expect(result).toEqual("no");
+    });
 });
