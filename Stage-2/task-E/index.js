@@ -15,7 +15,7 @@
 const hashSettings = [
     { xValue: 257, pMod: 10 ** 7 + 19 },
     { xValue: 263, pMod: 10 ** 7 + 79 },
-    { xValue: 269, pMod: 10 ** 7 + 103 }
+    { xValue: 269, pMod: 10 ** 7 + 103 },
 ];
 
 function mirroredString(s) {
@@ -51,7 +51,7 @@ function mirroredString(s) {
 
     const maxSubpolydrome = (from_1, from_2) => {
         let l = 0;
-        let r = Math.min(len - from_2 + from_1 - 1, len - from_1 + from_2 - 1);
+        let r = Math.min(from_1, len - from_1 + 1);
         let m;
         while (l < r) {
             m = Math.ceil((l + r) / 2);
@@ -79,19 +79,17 @@ function mirroredString(s) {
     let pos = 0;
     const len2 = (len - 1) * 2;
     for (let i = 1; i < 2 * len; i++) {
-        pos = i / 2;
-        const m = maxSubpolydrome(Math.ceil(pos + 1) - (i % 2), Math.floor(len2 - pos));
-        console.log(m);
-        countSubpolydrome += m + (i % 2);
+        pos = (i - 1) / 2;
+        countSubpolydrome += maxSubpolydrome(Math.ceil(pos) + 1, len - Math.floor(pos)); // + (i % 2);
     }
 
-    return len === 1 ? 1 : countSubpolydrome;
+    return countSubpolydrome;
 }
 
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin
+    input: process.stdin,
 });
 
 const _inputLines = [];
