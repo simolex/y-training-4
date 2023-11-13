@@ -1,33 +1,42 @@
-class Vertex {
-    constructor(from, to) {
-        this.from = from;
-        this.to = to;
-    }
-}
+/**
+ * A. Не минимум на отрезке
+ *
+ * Задана последовательность целых чисел a1, a2, …, an. Задаются запросы: сказать любой элемент
+ * последовательности на отрезке от L до R включительно, не равный минимуму на этом отрезке.
+ *
+ * Формат ввода:
+ * В первой строке содержатся два целых числа N, 1 ≤ N ≤ 100 и M, 1 ≤ M ≤ 1000 — длина
+ * последовательности и количество запросов соответственно.
+ * Во второй строке — сама последовательность, 0 ≤ ai ≤ 1000.
+ * Начиная с третьей строки перечисляются M запросов, состоящих из границ отрезка L и R,
+ * где L, R - индексы массива, нумеруются с нуля.
+ *
+ * Формат вывода:
+ * На каждый запрос выведите в отдельной строке ответ — любой элемент на [L, R], кроме минимального.
+ * В случае, если такого элемента нет, выведите "NOT FOUND".
+ */
 
-class MinMax {
-    constructor(min, max) {
-        this.min = min;
-        this.max = max;
-    }
-}
-
-function buildSegmentTree(n, numberLine) {
-    // TODO
-}
-
-function printQueriesResult(m, queries) {
-    // TODO
+function getQueriesResult(n, m, numberLine, queries) {
+    const result = [];
 
     for (let i = 0; i < m; i++) {
-        console.log("result");
+        const l = queries[i][0];
+        const r = queries[i][1];
+        let min = 1001;
+        let max = 0;
+        for (let j = l; j <= r && j < n; j++) {
+            min = Math.min(numberLine[j], min);
+            max = Math.max(numberLine[j], max);
+        }
+        result.push(min === max ? "NOT FOUND" : max);
     }
+    return result;
 }
 
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin
+    input: process.stdin,
 });
 
 const _inputLines = [];
@@ -45,12 +54,9 @@ function solve() {
     const m = firsLine[1];
     const numberLine = readArray();
 
-    const size = Math.pow(2, Math.ceil(Math.log2(n)));
-    const tree = [];
-    const segTree = buildSegmentTree(n, numberLine);
-
     const queries = readEdges(m);
-    printQueriesResult(m, queries);
+    const result = getQueriesResult(n, m, numberLine, queries);
+    console.log(result.join("\n"));
 }
 
 function readInt() {
@@ -72,7 +78,9 @@ function readEdges(n) {
     let grid = [];
     for (let i = 0; i < n; i++) {
         let vertex = readArray();
-        grid.push(new Vertex(vertex[0], vertex[1]));
+        grid.push(vertex);
     }
     return grid;
 }
+
+module.exports = getQueriesResult;
