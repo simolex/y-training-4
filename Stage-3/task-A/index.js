@@ -51,7 +51,7 @@ function sort(n, a, max) {
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin,
+    input: process.stdin
 });
 
 const _inputLines = [];
@@ -65,15 +65,15 @@ process.stdin.on("end", solve);
 
 function solve() {
     const n = readInt();
+    const s = readInt();
+    const f = readInt();
     const a = [];
-    let max = 0;
     for (let i = 0; i < n; i++) {
-        const s = readString();
-        max = Math.max(max, s.length);
-        a.push(s);
+        const s = readArray();
     }
 
-    sort(n, a, max);
+    const len = lengthShortPath(n, s, f, a);
+    return len;
 }
 
 function readInt() {
