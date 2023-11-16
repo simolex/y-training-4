@@ -13,39 +13,39 @@
  * Выведите искомое расстояние или -1, если пути между указанными вершинами не существует.
  */
 
-function getPhase(n, a, m) {
-    const p = [];
-    for (let i = 0; i < 10; i++) {
-        p[i] = [];
+function lengthShortPath(n, s, f, a) {
+    const dists = new Array(n + 1);
+    const visited = new Array(n + 1);
+
+    dists.fill(Infinity, 0);
+    dists[s] = 0;
+    visited.fill(false, 1);
+
+    const valuePath = (from, to) => a[from - 1][to - 1];
+    const getMinVertex = () =>
+        dists.reduce((minIndex, v, i) => (dists[i] < dists[minIndex] && !visited[i] ? i : minIndex), 0);
+
+    let minVertex;
+    let value;
+    let currentLenPath;
+
+    for (let i = 1; i <= n; i++) {
+        minVertex = getMinVertex();
+        if (minVertex === 0) break;
+
+        visited[minVertex] = true;
+        currentLenPath = dists[minVertex];
+
+        for (let j = 1; j <= n; j++) {
+            value = valuePath(minVertex, j);
+            if (value > 0) {
+                dists[j] = Math.min(dists[j], currentLenPath + value);
+            }
+        }
     }
-    for (let j = 0; j < n; j++) {
-        const index = a[j].length - m;
-        const basket = index < 0 ? 0 : a[j].substring(index, index + 1);
-        p[basket].push(a[j]);
-    }
 
-    console.log("Phase " + m);
-    for (let i = 0; i < 10; i++) {
-        console.log("Bucket " + i + ": " + (p[i].length > 0 ? p[i].join(", ") : "empty"));
-    }
-    console.log("**********");
-
-    return p.flat();
-}
-
-function sort(n, a, max) {
-    console.log("Initial array:");
-    console.log(a.join(", "));
-    console.log("**********");
-
-    let r = a;
-    for (let i = 0; i < max; i++) {
-        r = getPhase(n, r, i + 1);
-    }
-
-    console.log("Sorted array:");
-    console.log(r.join(", "));
-    return r;
+    const len = dists[f];
+    return len === Infinity ? -1 : len;
 }
 
 const _readline = require("readline");
@@ -64,16 +64,18 @@ _reader.on("line", (line) => {
 process.stdin.on("end", solve);
 
 function solve() {
-    const n = readInt();
-    const s = readInt();
-    const f = readInt();
+    const params = readArray();
+    const n = params[0];
+    const s = params[1];
+    const f = params[2];
     const a = [];
+
     for (let i = 0; i < n; i++) {
-        const s = readArray();
+        a.push(readArray());
     }
 
     const len = lengthShortPath(n, s, f, a);
-    return len;
+    console.log(len);
 }
 
 function readInt() {
@@ -97,4 +99,4 @@ function readArray() {
     return arr;
 }
 
-module.exports = sort;
+module.exports = lengthShortPath;
