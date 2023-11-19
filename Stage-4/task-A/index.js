@@ -4,48 +4,52 @@
  * По данному числу N (0 < N < 10) выведите все перестановки чисел от 1 до N в лексикографическом порядке.
  *
  */
-const { createWriteStream } = require("fs");
+const fs = require("fs");
 
-const output = createWriteStream("output.txt");
+const output = fs.createWriteStream("output.txt");
 
-const memoReshuffle = () => {
-    let cache = new Map();
-    const _reshuffle = (prefix, next) => {
-        if (next.length > 1) {
-            if (cache.has(next)) {
-                for (let s of cache.get(next)) {
-                    output.write(prefix + s + "\n");
-                }
-                return cache.get(next);
-            } else {
-                const r = [];
-                for (let i = 0; i < next.length; i++) {
-                    _reshuffle(
-                        prefix + next.substring(i, i + 1),
-                        next.substring(0, i) + next.substring(i + 1, next.length)
-                    ).forEach((v) => {
-                        r.push(next.substring(i, i + 1) + v);
-                    });
-                }
-                cache.set(next, r);
-                return r;
-            }
-        } else {
-            output.write(prefix + next + "\n");
-            return [next];
-        }
-    };
-    return _reshuffle;
-};
-
-const fn = memoReshuffle();
-
+// Алгоритм Нарайаны
 function reshuffle(n) {
-    let next = "";
+    let l, r;
+    let temp;
+
+    const value = [];
+
+    let steps = 1;
     for (let i = 1; i <= n; i++) {
-        next = next + i;
+        value.push(i);
+        steps *= i;
     }
-    fn("", next);
+    let v;
+
+    for (let i = 0; i < steps; i++) {
+        //result.push(value.join(""));
+        output.write(value.join("") + "\n");
+
+        l = n - 2;
+        while (value[l] > value[l + 1] && l >= 0) {
+            l--;
+        }
+        r = n - 1;
+        while (value[r] < value[l] && l >= 0) {
+            r--;
+        }
+
+        temp = value[r];
+        value[r] = value[l];
+        value[l] = temp;
+
+        l = l + 1;
+        r = n - 1;
+        while (l < r) {
+            temp = value[r];
+            value[r] = value[l];
+            value[l] = temp;
+            l++;
+            r--;
+        }
+    }
+    output.end("");
 }
 
 const _readline = require("readline");
@@ -65,6 +69,9 @@ process.stdin.on("end", solve);
 
 function solve() {
     const n = readInt();
+    delete _readline;
+    delete _reader;
+    delete _inputLines;
     reshuffle(n);
 }
 
@@ -72,15 +79,6 @@ function readInt() {
     const n = Number(_inputLines[_curLine]);
     _curLine++;
     return n;
-}
-
-function readArray() {
-    var arr = _inputLines[_curLine]
-        .trim(" ")
-        .split(" ")
-        .map((num) => Number(num));
-    _curLine++;
-    return arr;
 }
 
 module.exports = reshuffle;
