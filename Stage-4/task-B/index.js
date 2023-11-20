@@ -19,9 +19,33 @@
  * Необходимо вывести количество способов, которыми можно расселить в зоопарке
  * N динозавров, чтобы у зоопарка не было убытков.
  */
+function countDino(vr, rD, lD, n, max, count) {
+    //let prev = 0;
+    for (let i = 1; i <= max; i++) {
+        if (!vr[i] && !rD[i - 1 + n] && !lD[max - n + i - 1]) {
+            vr[i] = true;
+            rD[i - 1 + n] = true;
+            lD[max - n + i - 1] = true;
+            if (n > 0) {
+                count = countDino(vr, rD, lD, n - 1, max, count);
+            } else {
+                count++;
+            }
+
+            vr[i] = false;
+            rD[i - 1 + n] = false;
+            lD[max - n + i - 1] = false;
+        }
+    }
+    return count;
+}
 
 function getCountSettling(n) {
-    const value = new Int8Array(n);
+    const rightDiagonal = new Array(2 * n).fill(false);
+    const leftDiagonal = new Array(2 * n).fill(false);
+    const vertical = new Array(n + 1).fill(false);
+
+    const result = countDino(vertical, rightDiagonal, leftDiagonal, n - 1, n, 0);
 
     return result;
 }
@@ -29,7 +53,7 @@ function getCountSettling(n) {
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin,
+    input: process.stdin
 });
 
 const _inputLines = [];
@@ -43,9 +67,9 @@ process.stdin.on("end", solve);
 
 function solve() {
     const n = readInt();
-    delete _readline;
-    delete _reader;
-    delete _inputLines;
+    // delete _readline;
+    // delete _reader;
+    // delete _inputLines;
     const result = getCountSettling(n);
     console.log(result);
 }
