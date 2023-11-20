@@ -6,56 +6,59 @@
  */
 const fs = require("fs");
 
-const output = fs.createWriteStream("output.txt");
+const output = fs.createWriteStream("output.txt", { highWaterMark: 10240 });
 
 // Алгоритм Нарайаны
 function reshuffle(n) {
-    let l, r;
-    let temp;
-
-    const value = [];
+    const value = new Int8Array(n);
 
     let steps = 1;
     for (let i = 1; i <= n; i++) {
-        value.push(i);
+        value[i - 1] = "" + i;
         steps *= i;
     }
     let v;
+    for (let j = 0; j < n; j++) {
+        v = [];
+        for (let i = 0; i < steps / n; i++) {
+            let l, r;
+            let temp;
+            v.push(value.join("") + "\n");
 
-    for (let i = 0; i < steps; i++) {
-        //result.push(value.join(""));
-        output.write(value.join("") + "\n");
+            l = n - 2;
+            while (value[l] > value[l + 1] && l >= 0) {
+                l--;
+            }
+            r = n - 1;
+            while (value[r] < value[l] && l >= 0) {
+                r--;
+            }
 
-        l = n - 2;
-        while (value[l] > value[l + 1] && l >= 0) {
-            l--;
-        }
-        r = n - 1;
-        while (value[r] < value[l] && l >= 0) {
-            r--;
-        }
-
-        temp = value[r];
-        value[r] = value[l];
-        value[l] = temp;
-
-        l = l + 1;
-        r = n - 1;
-        while (l < r) {
             temp = value[r];
             value[r] = value[l];
             value[l] = temp;
-            l++;
-            r--;
+
+            l = l + 1;
+            r = n - 1;
+            while (l < r) {
+                temp = value[r];
+                value[r] = value[l];
+                value[l] = temp;
+                l++;
+                r--;
+            }
         }
+        output.write(v.join(""));
+        v = null;
     }
-    output.end("");
+
+    output.end();
 }
 
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin
+    input: process.stdin,
 });
 
 const _inputLines = [];
