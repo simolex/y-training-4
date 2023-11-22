@@ -18,10 +18,11 @@ const mapBrackets = {
     0: "(",
     1: "[",
     2: ")",
-    3: "]",
+    3: "]"
 };
 
 function getValidSet(vStack, szStack, arrSet, index, position, n) {
+    if (szStack[index] > n / 2) return false;
     if (position < n) {
         let curIndex;
         position++;
@@ -35,32 +36,46 @@ function getValidSet(vStack, szStack, arrSet, index, position, n) {
                     vStack[curIndex] = vStack[index] >> 1;
                     arrSet[curIndex] = (arrSet[index] << 2) + i;
 
-                    if (position === n) {
-                        let curSet = arrSet[curIndex];
+                    if (position === n && szStack[curIndex] === 0) {
                         let sLine = "";
                         for (let k = 0; k < n; k++) {
-                            const bitValue = curSet & 3;
+                            const bitValue = (arrSet[curIndex] >> (k * 2)) & 3;
                             sLine = mapBrackets[bitValue] + sLine;
-                            curSet = curSet >> 2;
                         }
                         console.log(sLine);
+                        return true;
                     }
-                }
+                } else szStack[curIndex] = n;
             } else {
-                if (szStack[index] >= n / 2) return false;
-                szStack[curIndex] = szStack[index] + 1;
-                vStack[curIndex] = (vStack[index] << 1) + i;
-                arrSet[curIndex] = (arrSet[index] << 2) + i;
+                if (szStack[index] <= n / 2) {
+                    szStack[curIndex] = szStack[index] + 1;
+                    vStack[curIndex] = (vStack[index] << 1) + i;
+                    arrSet[curIndex] = (arrSet[index] << 2) + i;
+                } else {
+                    szStack[curIndex] = n;
+                }
             }
-            getValidSet(vStack, szStack, arrSet, curIndex, position, n);
+            if (szStack[curIndex] <= n / 2) {
+                getValidSet(vStack, szStack, arrSet, curIndex, position, n);
+            }
         }
     }
 }
 
 function getCountSettling(n) {
-    const valueStackValidate = new Uint8Array(4 ** (n - 1) + 1);
-    const sizeStackValidate = new Uint8Array(4 ** (n - 1) + 1);
-    const arrSetOfBrackets = new Uint16Array(4 ** (n - 1) + 1);
+    if (n % 2 == 1 || n === 0) {
+        console.log("");
+        return;
+    }
+
+    let lenArraies = 0;
+    for (let k = 0; k < n; k++) {
+        lenArraies = lenArraies * 4 + 1;
+    }
+
+    const valueStackValidate = new Uint8Array(lenArraies);
+    const sizeStackValidate = new Uint8Array(lenArraies);
+    const arrSetOfBrackets = new Uint32Array(lenArraies);
 
     const index = 0;
     valueStackValidate[index] = 0;
@@ -68,12 +83,18 @@ function getCountSettling(n) {
     arrSetOfBrackets[index] = 0;
 
     getValidSet(valueStackValidate, sizeStackValidate, arrSetOfBrackets, index, 1, n);
+
+    valueStackValidate[index] = 1;
+    sizeStackValidate[index] = 1;
+    arrSetOfBrackets[index] = 1;
+
+    getValidSet(valueStackValidate, sizeStackValidate, arrSetOfBrackets, index, 1, n);
 }
 
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin,
+    input: process.stdin
 });
 
 const _inputLines = [];
@@ -91,7 +112,7 @@ function solve() {
     // delete _reader;
     // delete _inputLines;
     const result = getCountSettling(n);
-    console.log(result);
+    //console.log(result);
 }
 
 function readInt() {
