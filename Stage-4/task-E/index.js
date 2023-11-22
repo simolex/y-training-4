@@ -13,43 +13,67 @@
  *
  */
 
-const bracketSet = ["(", "[", ")", "]"];
+// const bracketsSet = ["(", "[", ")", "]"];
+const mapBrackets = {
+    0: "(",
+    1: "[",
+    2: ")",
+    3: "]",
+};
 
-// function countDino(vr, rD, lD, n, max, count) {
-//     //let prev = 0;
-//     for (let i = 1; i <= max; i++) {
-//         if (!vr[i] && !rD[i - 1 + n] && !lD[max - n + i - 1]) {
-//             vr[i] = true;
-//             rD[i - 1 + n] = true;
-//             lD[max - n + i - 1] = true;
-//             if (n > 0) {
-//                 count = countDino(vr, rD, lD, n - 1, max, count);
-//             } else {
-//                 count++;
-//             }
+function getValidSet(vStack, szStack, arrSet, index, position, n) {
+    if (position < n) {
+        let curIndex;
+        position++;
 
-//             vr[i] = false;
-//             rD[i - 1 + n] = false;
-//             lD[max - n + i - 1] = false;
-//         }
-//     }
-//     return count;
-// }
+        for (let i = 0; i < 4; i++) {
+            curIndex = 4 * index + i + 1;
+
+            if (i > 1) {
+                if (szStack[index] > 0 && (vStack[index] & 1) + 2 === i) {
+                    szStack[curIndex] = szStack[index] - 1;
+                    vStack[curIndex] = vStack[index] >> 1;
+                    arrSet[curIndex] = (arrSet[index] << 2) + i;
+
+                    if (position === n) {
+                        let curSet = arrSet[curIndex];
+                        let sLine = "";
+                        for (let k = 0; k < n; k++) {
+                            const bitValue = curSet & 3;
+                            sLine = mapBrackets[bitValue] + sLine;
+                            curSet = curSet >> 2;
+                        }
+                        console.log(sLine);
+                    }
+                }
+            } else {
+                if (szStack[index] >= n / 2) return false;
+                szStack[curIndex] = szStack[index] + 1;
+                vStack[curIndex] = (vStack[index] << 1) + i;
+                arrSet[curIndex] = (arrSet[index] << 2) + i;
+            }
+            getValidSet(vStack, szStack, arrSet, curIndex, position, n);
+        }
+    }
+}
 
 function getCountSettling(n) {
-    const rightDiagonal = new Array(2 * n).fill(false);
-    const leftDiagonal = new Array(2 * n).fill(false);
-    const vertical = new Array(n + 1).fill(false);
+    const valueStackValidate = new Uint8Array(4 ** (n - 1) + 1);
+    const sizeStackValidate = new Uint8Array(4 ** (n - 1) + 1);
+    const arrSetOfBrackets = new Uint16Array(4 ** (n - 1) + 1);
 
-    const result = countDino(vertical, rightDiagonal, leftDiagonal, n - 1, n, 0);
+    const index = 0;
+    valueStackValidate[index] = 0;
+    sizeStackValidate[index] = 1;
+    arrSetOfBrackets[index] = 0;
 
-    return result;
+    getValidSet(valueStackValidate, sizeStackValidate, arrSetOfBrackets, index, 1, n);
 }
 
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin
+    input: process.stdin,
 });
 
 const _inputLines = [];
