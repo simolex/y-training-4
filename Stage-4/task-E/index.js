@@ -12,14 +12,13 @@
  * длины N в лексикографическом порядке. Каждая последовательность должна выводиться в новой строке.
  *
  */
-
-// const bracketsSet = ["(", "[", ")", "]"];
+const fs = require("fs");
 
 const mapBrackets = {
-    0: 40,
-    1: 91,
-    2: 41,
-    3: 93,
+    0: "(",
+    1: "[",
+    2: ")",
+    3: "]"
 };
 
 function sleep(milliseconds) {
@@ -31,27 +30,33 @@ function sleep(milliseconds) {
 }
 
 const fileBuffer = () => {
-    const size = 2 ** 14;
-    const buffer = new Uint8Array(size);
+    const size = 2 ** 13;
+    const buffer = new Array(size);
+    const output = fs.createWriteStream("brackets2.out", { highWaterMark: 10240 });
     let current = 0;
     let bitValue;
+    let v;
     return {
         close() {
-            if (current > 0) console.log(String.fromCharCode.apply(null, buffer.slice(0, current)));
+            if (current > 0) output.write(buffer.slice(0, current).join(""));
             current = 0;
         },
         print(bitMask, n) {
-            if (size - current < n + 1) {
+            if (size - current < 1) {
                 this.close();
             }
-            current = current + n;
+            let v = "";
             for (let k = 0; k < n; k++) {
                 bitValue = (bitMask >> (k * 2)) & 3;
-                buffer[current - k - 1] = mapBrackets[bitValue];
+                v = mapBrackets[bitValue] + v;
             }
-            buffer[current] = 10;
+            buffer[current] = v + "\n";
+            v = null;
             current++;
         },
+        end() {
+            output.end();
+        }
     };
 };
 const file = fileBuffer();
@@ -69,7 +74,7 @@ function getValidSet(parentStack, parentSet, position, n) {
             curIndex = 2 * i;
 
             if (i > 1) {
-                if (parentStack[0] > 0 && (parentStack[1] & 1) + 2 === i) {
+                if (parentStack[0] > 0 && ((parentStack[1] & 1) | 2) === i) {
                     stack[curIndex] = parentStack[0] - 1;
                     stack[curIndex + 1] = parentStack[1] >> 1;
                     sets[i] = (parentSet[0] << 2) + i;
@@ -82,8 +87,8 @@ function getValidSet(parentStack, parentSet, position, n) {
             } else {
                 if (parentStack[0] <= n / 2 - 1) {
                     stack[curIndex] = parentStack[0] + 1;
-                    stack[curIndex + 1] = (parentStack[1] << 1) + i;
-                    sets[i] = (parentSet[0] << 2) + i;
+                    stack[curIndex + 1] = (parentStack[1] << 1) | i;
+                    sets[i] = (parentSet[0] << 2) | i;
                 } else {
                     stack[curIndex] = n;
                 }
@@ -115,12 +120,13 @@ function getCountSettling(n) {
 
     getValidSet(stack, arrSet, 1, n);
     file.close();
+    file.end();
 }
 
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin,
+    input: process.stdin
 });
 
 const _inputLines = [];
