@@ -14,12 +14,47 @@
  */
 
 // const bracketsSet = ["(", "[", ")", "]"];
+
 const mapBrackets = {
-    0: "(",
-    1: "[",
-    2: ")",
-    3: "]"
+    0: 40,
+    1: 91,
+    2: 41,
+    3: 93,
 };
+
+function sleep(milliseconds) {
+    const date = Date.now();
+    let currentDate = null;
+    do {
+        currentDate = Date.now();
+    } while (currentDate - date < milliseconds);
+}
+
+const fileBuffer = () => {
+    const size = 2 ** 14;
+    const buffer = new Uint8Array(size);
+    let current = 0;
+    let bitValue;
+    return {
+        close() {
+            console.log(String.fromCharCode.apply(null, buffer.slice(0, current)));
+            current = 0;
+        },
+        print(bitMask, n) {
+            if (size - current < n + 1) {
+                this.close();
+            }
+            current = current + n;
+            for (let k = 0; k < n; k++) {
+                bitValue = (bitMask >> (k * 2)) & 3;
+                buffer[(current - k - 1) % size] = mapBrackets[bitValue];
+            }
+            buffer[current % size] = 13;
+            current++;
+        },
+    };
+};
+const file = fileBuffer();
 
 function getValidSet(vStack, szStack, arrSet, index, position, n) {
     if (szStack[index] > n / 2) return false;
@@ -37,12 +72,7 @@ function getValidSet(vStack, szStack, arrSet, index, position, n) {
                     arrSet[curIndex] = (arrSet[index] << 2) + i;
 
                     if (position === n && szStack[curIndex] === 0) {
-                        let sLine = "";
-                        for (let k = 0; k < n; k++) {
-                            const bitValue = (arrSet[curIndex] >> (k * 2)) & 3;
-                            sLine = mapBrackets[bitValue] + sLine;
-                        }
-                        console.log(sLine);
+                        file.print(arrSet[curIndex], n);
                         return true;
                     }
                 } else szStack[curIndex] = n;
@@ -89,12 +119,13 @@ function getCountSettling(n) {
     arrSetOfBrackets[index] = 1;
 
     getValidSet(valueStackValidate, sizeStackValidate, arrSetOfBrackets, index, 1, n);
+    file.close();
 }
 
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin
+    input: process.stdin,
 });
 
 const _inputLines = [];
