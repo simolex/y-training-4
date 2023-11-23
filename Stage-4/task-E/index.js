@@ -37,7 +37,7 @@ const fileBuffer = () => {
     let bitValue;
     return {
         close() {
-            console.log(String.fromCharCode.apply(null, buffer.slice(0, current)));
+            if (current > 0) console.log(String.fromCharCode.apply(null, buffer.slice(0, current)));
             current = 0;
         },
         print(bitMask, n) {
@@ -47,46 +47,49 @@ const fileBuffer = () => {
             current = current + n;
             for (let k = 0; k < n; k++) {
                 bitValue = (bitMask >> (k * 2)) & 3;
-                buffer[(current - k - 1) % size] = mapBrackets[bitValue];
+                buffer[current - k - 1] = mapBrackets[bitValue];
             }
-            buffer[current % size] = 13;
+            buffer[current] = 10;
             current++;
         },
     };
 };
 const file = fileBuffer();
 
-function getValidSet(vStack, szStack, arrSet, index, position, n) {
-    if (szStack[index] > n / 2) return false;
+function getValidSet(parentStack, parentSet, position, n) {
+    const stack = new Uint8Array(8);
+    const sets = new Uint32Array(4);
+
+    if (parentStack[0] > n / 2) return false;
     if (position < n) {
         let curIndex;
         position++;
 
         for (let i = 0; i < 4; i++) {
-            curIndex = 4 * index + i + 1;
+            curIndex = 2 * i;
 
             if (i > 1) {
-                if (szStack[index] > 0 && (vStack[index] & 1) + 2 === i) {
-                    szStack[curIndex] = szStack[index] - 1;
-                    vStack[curIndex] = vStack[index] >> 1;
-                    arrSet[curIndex] = (arrSet[index] << 2) + i;
+                if (parentStack[0] > 0 && (parentStack[1] & 1) + 2 === i) {
+                    stack[curIndex] = parentStack[0] - 1;
+                    stack[curIndex + 1] = parentStack[1] >> 1;
+                    sets[i] = (parentSet[0] << 2) + i;
 
-                    if (position === n && szStack[curIndex] === 0) {
-                        file.print(arrSet[curIndex], n);
+                    if (position === n && stack[curIndex] === 0) {
+                        file.print(sets[i], n);
                         return true;
                     }
-                } else szStack[curIndex] = n;
+                } else stack[curIndex] = n;
             } else {
-                if (szStack[index] <= n / 2) {
-                    szStack[curIndex] = szStack[index] + 1;
-                    vStack[curIndex] = (vStack[index] << 1) + i;
-                    arrSet[curIndex] = (arrSet[index] << 2) + i;
+                if (parentStack[0] <= n / 2 - 1) {
+                    stack[curIndex] = parentStack[0] + 1;
+                    stack[curIndex + 1] = (parentStack[1] << 1) + i;
+                    sets[i] = (parentSet[0] << 2) + i;
                 } else {
-                    szStack[curIndex] = n;
+                    stack[curIndex] = n;
                 }
             }
-            if (szStack[curIndex] <= n / 2) {
-                getValidSet(vStack, szStack, arrSet, curIndex, position, n);
+            if (stack[curIndex] <= n / 2 && position < n) {
+                getValidSet(stack.slice(curIndex, curIndex + 2), sets.slice(i, i + 1), position, n);
             }
         }
     }
@@ -97,28 +100,20 @@ function getCountSettling(n) {
         console.log("");
         return;
     }
+    const stack = new Uint8Array(2);
+    const arrSet = new Uint32Array(1);
 
-    let lenArraies = 0;
-    for (let k = 0; k < n; k++) {
-        lenArraies = lenArraies * 4 + 1;
-    }
+    stack[0] = 1;
+    stack[1] = 0;
+    arrSet[0] = 0;
 
-    const valueStackValidate = new Uint8Array(lenArraies);
-    const sizeStackValidate = new Uint8Array(lenArraies);
-    const arrSetOfBrackets = new Uint32Array(lenArraies);
+    getValidSet(stack, arrSet, 1, n);
 
-    const index = 0;
-    valueStackValidate[index] = 0;
-    sizeStackValidate[index] = 1;
-    arrSetOfBrackets[index] = 0;
+    stack[0] = 1;
+    stack[1] = 1;
+    arrSet[0] = 1;
 
-    getValidSet(valueStackValidate, sizeStackValidate, arrSetOfBrackets, index, 1, n);
-
-    valueStackValidate[index] = 1;
-    sizeStackValidate[index] = 1;
-    arrSetOfBrackets[index] = 1;
-
-    getValidSet(valueStackValidate, sizeStackValidate, arrSetOfBrackets, index, 1, n);
+    getValidSet(stack, arrSet, 1, n);
     file.close();
 }
 
