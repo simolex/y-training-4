@@ -22,12 +22,17 @@ const mapBrackets = {
 };
 
 class Bracket {
-    constructor(value, prev = null) {
-        this.value = value;
+    constructor(pos, prev = null) {
+        this.code = 0;
+        this.pos = pos;
         this.prev = prev;
     }
+    nextBracket() {
+        this.code++;
+        return this.code < 4 ? this : this.prev; // TODO
+    }
     toString() {
-        return !!this.prev ? this.prev.toString() + this.value : this.value;
+        return !!this.prev ? this.prev.toString() + mapBrackets[this.code] : mapBrackets[this.code];
     }
 }
 
