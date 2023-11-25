@@ -62,39 +62,43 @@ const fileBuffer = () => {
 const file = fileBuffer();
 
 function getValidSet(parentStack, parentSet, position, n) {
-    const stack = new Uint8Array(8);
-    const sets = new Uint32Array(4);
-
     if (parentStack[0] > n / 2) return false;
     if (position < n) {
-        let curIndex;
         position++;
 
         for (let i = 0; i < 4; i++) {
-            curIndex = 2 * i;
-
             if (i > 1) {
                 if (parentStack[0] > 0 && ((parentStack[1] & 1) | 2) === i) {
-                    stack[curIndex] = parentStack[0] - 1;
-                    stack[curIndex + 1] = parentStack[1] >> 1;
-                    sets[i] = (parentSet[0] << 2) + i;
+                    parentStack[0] = parentStack[0] - 1;
+                    parentStack[1] = parentStack[1] >> 1;
+                    parentSet[0] = (parentSet[0] << 2) + i;
 
-                    if (position === n && stack[curIndex] === 0) {
-                        file.print(sets[i], n);
+                    if (position === n && parentStack[0] === 0) {
+                        file.print(parentSet[0], n);
+                        parentStack[0] = parentStack[0] + 1;
+                        parentStack[1] = (parentStack[1] << 1) + (i - 2);
+                        parentSet[0] = parentSet[0] >> 2;
                         return true;
                     }
-                } else stack[curIndex] = n;
+                } else continue;
             } else {
-                if (parentStack[0] <= n / 2 - 1) {
-                    stack[curIndex] = parentStack[0] + 1;
-                    stack[curIndex + 1] = (parentStack[1] << 1) | i;
-                    sets[i] = (parentSet[0] << 2) | i;
-                } else {
-                    stack[curIndex] = n;
-                }
+                if (parentStack[0] < n - position) {
+                    parentStack[0] = parentStack[0] + 1;
+                    parentStack[1] = (parentStack[1] << 1) | i;
+                    parentSet[0] = (parentSet[0] << 2) | i;
+                } else continue;
             }
-            if (stack[curIndex] <= n / 2 && position < n) {
-                getValidSet(stack.slice(curIndex, curIndex + 2), sets.slice(i, i + 1), position, n);
+            if (parentStack[0] <= n - position) {
+                getValidSet(parentStack, parentSet, position, n);
+                if (i > 1) {
+                    parentStack[0] = parentStack[0] + 1;
+                    parentStack[1] = (parentStack[1] << 1) | (i - 2);
+                    parentSet[0] = parentSet[0] >> 2;
+                } else {
+                    parentStack[0] = parentStack[0] - 1;
+                    parentStack[1] = parentStack[1] >> 1;
+                    parentSet[0] = parentSet[0] >> 2;
+                }
             }
         }
     }
