@@ -14,51 +14,118 @@
  * Выведите одно число – расстояние между нужными городами.
  * Если по дорогам от города А до города В доехать невозможно, выведите –1
  */
+class MinHeap {
+    constructor(initValues) {
+        if (initValues) {
+            this.values = initValues;
+            const lastElementWithChilds = Math.floor(initValues.length / 2) - 1;
+            for (let i = lastElementWithChilds; i >= 0; i--) {
+                this._balancing(i);
+            }
+        } else this.values = [];
+    }
+    add(element) {
+        this.values.push(element);
+        let index = this.values.length - 1;
 
-function fastDijkstra(n, k, arr, a, b) {
-    // const dists = new Array(n + 1);
-    // const visited = new Array(n + 1);
-    // const path = new Array(n + 1);
-    // dists.fill(Infinity, 0);
-    // dists[s] = 0;
-    // visited.fill(false, 1);
-    // const weightPath = (from, to) => arr[from - 1][to - 1];
-    // const getMinVertex = () =>
-    //     dists.reduce((minIndex, v, i) => (dists[i] < dists[minIndex] && !visited[i] ? i : minIndex), 0);
-    // let minVertex;
-    // let value;
-    // let currentLenPath;
-    // for (let i = 1; i <= n; i++) {
-    //     minVertex = getMinVertex();
-    //     if (minVertex === 0) break;
-    //     visited[minVertex] = true;
-    //     currentLenPath = dists[minVertex];
-    //     for (let j = 1; j <= n; j++) {
-    //         value = weightPath(minVertex, j);
-    //         if (value > 0) {
-    //             if (dists[j] > currentLenPath + value) {
-    //                 dists[j] = currentLenPath + value;
-    //                 path[j] = minVertex;
-    //             }
-    //         }
-    //     }
-    // }
-    // let currentPoint;
-    // const pathArr = [];
-    // let result;
-    // if (dists[f] === Infinity) {
-    //     result = -1;
-    // } else {
-    //     currentPoint = f;
-    //     while (currentPoint !== s) {
-    //         pathArr.push(currentPoint);
-    //         currentPoint = path[currentPoint];
-    //     }
-    //     pathArr.push(s);
-    //     pathArr.reverse();
-    //     result = pathArr.join(" ");
-    // }
-    // return result;
+        while (index > 0) {
+            const current = this.values[index];
+            let parentIndex = Math.floor((index - 1) / 2);
+
+            if (this.values[parentIndex].value > current.value) {
+                this.values[index] = this.values[parentIndex];
+                this.values[parentIndex] = current;
+                index = parentIndex;
+            } else break;
+        }
+    }
+    _balancing(index) {
+        const length = this.values.length;
+        while (index * 2 + 1 < length - 1) {
+            const current = this.values[index];
+            let leftChildIndex = 2 * index + 1;
+            let rightChildIndex = 2 * index + 2;
+            let leftChild, rightChild;
+            let swap = null;
+            leftChild = this.values[leftChildIndex];
+            rightChild = this.values[rightChildIndex];
+
+            if (rightChildIndex === length) {
+                swap = leftChild;
+            }
+            swap = rightChild.value <= leftChild.value && swap === null ? rightChildIndex : leftChildIndex;
+            if (this.values[swap].value < current.value) {
+                this.values[index] = this.values[swap];
+                this.values[swap] = current;
+                index = swap;
+            } else break;
+        }
+    }
+    getMin() {
+        let index = 0;
+        const min = this.values[index];
+        this.values[index] = this.values[this.values.length - 1];
+
+        this._balancing(index);
+        this.values.pop();
+        return min;
+    }
+
+    getValues() {
+        return this.values;
+    }
+
+    isEmpty() {
+        return this.values.length === 0;
+    }
+}
+
+function fastDijkstra(n, k, arrInit, a, b) {
+    const roads = {};
+    const minDists = new MinHeap();
+    const visited = new Array(n + 1);
+    const dists = new Array(n + 1);
+
+    dists.fill(Infinity, 0);
+    dists[a] = 0;
+    minDists.add({ value: 0, vertex: a });
+    visited.fill(false, 1);
+
+    const setWeight = (from, to, weight) => {
+        if (!roads[from]) {
+            roads[from] = {};
+        }
+        roads[from][to] = weight;
+    };
+    const weightPath = (from, to) => roads[from][to];
+    const pathFrom = (from) => roads[from];
+    const getMinDistantion = () => minDists.getMin();
+
+    for (let i = 0; i < k; i++) {
+        setWeight(arrInit[i][0], arrInit[i][1], arrInit[i][2]);
+        setWeight(arrInit[i][1], arrInit[i][0], arrInit[i][2]);
+    }
+    let minDistantion;
+    let value;
+    let currentLenPath;
+
+    while (!minDists.isEmpty()) {
+        minDistantion = getMinDistantion();
+        visited[minDistantion.vertex] = true;
+        currentLenPath = dists[minDistantion.vertex];
+        for (let toVertex in pathFrom(minDistantion.vertex)) {
+            value = weightPath(minDistantion.vertex, toVertex);
+            if (value > 0) {
+                if (dists[toVertex] > currentLenPath + value) {
+                    dists[toVertex] = currentLenPath + value;
+                    minDists.add({ value: currentLenPath + value, vertex: toVertex });
+                }
+            }
+        }
+    }
+
+    const len = dists[b];
+    return len === Infinity ? -1 : len;
 }
 
 const _readline = require("readline");
