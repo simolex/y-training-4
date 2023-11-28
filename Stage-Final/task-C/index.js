@@ -45,7 +45,7 @@ class MinHeap {
             const current = this.values[index];
             let parentIndex = Math.floor((index - 1) / 2);
 
-            if (this.values[parentIndex].value > current.value) {
+            if (this.values[parentIndex].value >= current.value) {
                 this.values[index] = this.values[parentIndex];
                 this.values[parentIndex] = current;
                 index = parentIndex;
@@ -67,7 +67,7 @@ class MinHeap {
                 swap = leftChild;
             }
             swap = rightChild.value <= leftChild.value && swap === null ? rightChildIndex : leftChildIndex;
-            if (this.values[swap].value < current.value) {
+            if (this.values[swap].value <= current.value) {
                 this.values[index] = this.values[swap];
                 this.values[swap] = current;
                 index = swap;
@@ -91,36 +91,26 @@ class MinHeap {
     isEmpty() {
         return this.values.length === 0;
     }
+    clean() {
+        this.values = [];
+    }
 }
 
-function fastVasuki(n, k, arrInit, a, b) {
-    const roads = {};
+function testRelocation(n, roads, testingWeight) {
+    const timeLimit = 1440;
     const minDists = new MinHeap();
     const visited = new Array(n + 1);
     const dists = new Array(n + 1);
 
     dists.fill(Infinity, 0);
-    dists[a] = 0;
-    minDists.add({ value: 0, vertex: a });
+    dists[1] = 0;
+    minDists.add({ value: 0, vertex: 1 });
     visited.fill(false, 1);
 
-    const setWeight = (from, to, start, end) => {
-        if (!roads[from]) {
-            roads[from] = {};
-        }
-        if (!roads[from][to]) {
-            roads[from][to] = [];
-        }
-        roads[from][to];
-        roads[from][to].push({ start, end });
-    };
     const weightPath = (from, to) => roads[from][to];
     const pathFrom = (from) => roads[from];
     const getMinDistantion = () => minDists.getMin();
 
-    for (let i = 0; i < k; i++) {
-        setWeight(arrInit[i][0], arrInit[i][2], arrInit[i][1], arrInit[i][3]);
-    }
     let minDistantion;
     let currentTime;
 
@@ -130,25 +120,62 @@ function fastVasuki(n, k, arrInit, a, b) {
         } while (visited[minDistantion.vertex] && !minDists.isEmpty());
 
         if (visited[minDistantion.vertex] && minDists.isEmpty()) break;
-        if (minDistantion.vertex === b) break;
+        if (minDistantion.vertex === n) break;
 
         visited[minDistantion.vertex] = true;
         currentTime = dists[minDistantion.vertex];
         for (let toVertex in pathFrom(minDistantion.vertex)) {
             const buses = weightPath(minDistantion.vertex, toVertex);
             for (const bus of buses) {
-                const { start, end } = bus;
+                const { time, weight } = bus;
 
-                if (currentTime <= start && dists[toVertex] > end && !visited[toVertex]) {
-                    dists[toVertex] = end;
-                    minDists.add({ value: end, vertex: toVertex });
+                if (
+                    currentTime + time <= timeLimit &&
+                    weight <= testingWeight &&
+                    dists[toVertex] > currentTime + time &&
+                    !visited[toVertex]
+                ) {
+                    dists[toVertex] = currentTime + time;
+                    minDists.add({ value: currentTime + time, vertex: toVertex });
                 }
             }
         }
     }
+    return dists[n] != Infinity && dists[n] <= timeLimit;
+}
 
-    const len = dists[b];
-    return len === Infinity ? -1 : len;
+function cupsRelocation(n, mInit, arrInit) {
+    const roads = {};
+    let maxWeight = 0;
+
+    const setWeight = (from, to, time, weight) => {
+        if (!roads[from]) {
+            roads[from] = {};
+        }
+        if (!roads[from][to]) {
+            roads[from][to] = [];
+        }
+        roads[from][to];
+        roads[from][to].push({ time, weight });
+        maxWeight = Math.max(maxWeight, weight);
+    };
+
+    for (let i = 0; i < mInit; i++) {
+        setWeight(arrInit[i][0], arrInit[i][1], arrInit[i][2], arrInit[i][3]);
+    }
+
+    let l = 0;
+    let r = maxWeight;
+    let m;
+    while (l < r) {
+        m = l + Math.ceil((r - l + 1) / 2);
+        if (testRelocation(n, roads, m)) {
+            l = m;
+        } else {
+            r = m - 1;
+        }
+    }
+    return l;
 }
 
 const _readline = require("readline");
@@ -167,20 +194,16 @@ _reader.on("line", (line) => {
 process.stdin.on("end", solve);
 
 function solve() {
-    const n = readInt();
-
     const params_2 = readArray();
-    const a = params_2[0];
-    const b = params_2[1];
-
-    const k = readInt();
+    const n = params_2[0];
+    const m = params_2[1];
 
     const arr = [];
-    for (let i = 0; i < k; i++) {
+    for (let i = 0; i < m; i++) {
         arr.push(readArray());
     }
 
-    const len = fastVasuki(n, k, arr, a, b);
+    const len = cupsRelocation(n, m, arr);
     console.log(len);
 }
 
@@ -205,4 +228,4 @@ function readArray() {
     return arr;
 }
 
-module.exports = fastVasuki;
+module.exports = cupsRelocation;
