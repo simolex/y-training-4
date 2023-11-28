@@ -1,6 +1,6 @@
 const solution = require(".");
 
-describe("D. Автобусы в Васюках", () => {
+describe("C. Переезд", () => {
     test("test-1", () => {
         const result = solution(
             3,
