@@ -1,6 +1,6 @@
 const solution = require(".");
 
-describe("E. Подпалиндромы", () => {
+describe("B. Зеркальная z-функция", () => {
     test("test-1", () => {
         const result = solution(5, "BBABB");
         expect(result).toEqual([1, 2, 0, 1, 5]);
