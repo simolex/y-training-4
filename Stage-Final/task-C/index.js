@@ -66,7 +66,10 @@ class MinHeap {
             if (rightChildIndex === length) {
                 swap = leftChild;
             }
-            swap = rightChild.value <= leftChild.value && swap === null ? rightChildIndex : leftChildIndex;
+            swap =
+                rightChild.value <= leftChild.value && swap === null
+                    ? rightChildIndex
+                    : leftChildIndex;
             if (this.values[swap].value <= current.value) {
                 this.values[index] = this.values[swap];
                 this.values[swap] = current;
@@ -131,8 +134,8 @@ function testRelocation(n, roads, testingWeight) {
 
                 if (
                     currentTime + time <= timeLimit &&
-                    weight <= testingWeight &&
-                    dists[toVertex] > currentTime + time &&
+                    weight >= testingWeight &&
+                    dists[toVertex] >= currentTime + time &&
                     !visited[toVertex]
                 ) {
                     dists[toVertex] = currentTime + time;
@@ -149,6 +152,7 @@ function cupsRelocation(n, mInit, arrInit) {
     let maxWeight = 0;
 
     const setWeight = (from, to, time, weight) => {
+        weight = weight - 3000000;
         if (!roads[from]) {
             roads[from] = {};
         }
@@ -157,15 +161,16 @@ function cupsRelocation(n, mInit, arrInit) {
         }
         roads[from][to];
         roads[from][to].push({ time, weight });
-        maxWeight = Math.max(maxWeight, weight);
+        //maxWeight = Math.max(maxWeight, weight);
     };
 
     for (let i = 0; i < mInit; i++) {
         setWeight(arrInit[i][0], arrInit[i][1], arrInit[i][2], arrInit[i][3]);
+        setWeight(arrInit[i][1], arrInit[i][0], arrInit[i][2], arrInit[i][3]);
     }
 
     let l = 0;
-    let r = maxWeight;
+    let r = 10 ** 9; //maxWeight + 1;
     let m;
     while (l < r) {
         m = l + Math.ceil((r - l + 1) / 2);
@@ -175,13 +180,13 @@ function cupsRelocation(n, mInit, arrInit) {
             r = m - 1;
         }
     }
-    return l;
+    return l > 99 ? Math.floor(l / 100) : 0;
 }
 
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin
+    input: process.stdin,
 });
 
 const _inputLines = [];
