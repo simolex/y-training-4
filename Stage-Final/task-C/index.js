@@ -27,119 +27,41 @@
  * не нарушая правил дорожного движения и не опоздав к началу сериала.
  */
 
-class MinHeap {
-    constructor(initValues) {
-        if (initValues) {
-            this.values = initValues;
-            const lastElementWithChilds = Math.floor(initValues.length / 2) - 1;
-            for (let i = lastElementWithChilds; i >= 0; i--) {
-                this._balancing(i);
-            }
-        } else this.values = [];
-    }
-    add(element) {
-        this.values.push(element);
-        let index = this.values.length - 1;
-
-        while (index > 0) {
-            const current = this.values[index];
-            let parentIndex = Math.floor((index - 1) / 2);
-
-            if (this.values[parentIndex].value >= current.value) {
-                this.values[index] = this.values[parentIndex];
-                this.values[parentIndex] = current;
-                index = parentIndex;
-            } else break;
-        }
-    }
-    _balancing(index) {
-        const length = this.values.length;
-        while (index * 2 + 1 < length - 1) {
-            const current = this.values[index];
-            let leftChildIndex = 2 * index + 1;
-            let rightChildIndex = 2 * index + 2;
-            let leftChild, rightChild;
-            let swap = null;
-            leftChild = this.values[leftChildIndex];
-            rightChild = this.values[rightChildIndex];
-
-            if (rightChildIndex === length) {
-                swap = leftChild;
-            }
-            swap =
-                rightChild.value <= leftChild.value && swap === null
-                    ? rightChildIndex
-                    : leftChildIndex;
-            if (this.values[swap].value <= current.value) {
-                this.values[index] = this.values[swap];
-                this.values[swap] = current;
-                index = swap;
-            } else break;
-        }
-    }
-    getMin() {
-        let index = 0;
-        const min = this.values[index];
-        this.values[index] = this.values[this.values.length - 1];
-
-        this._balancing(index);
-        this.values.pop();
-        return min;
-    }
-
-    getValues() {
-        return this.values;
-    }
-
-    isEmpty() {
-        return this.values.length === 0;
-    }
-    clean() {
-        this.values = [];
-    }
-}
-
 function testRelocation(n, roads, testingWeight) {
     const timeLimit = 1440;
-    const minDists = new MinHeap();
     const visited = new Array(n + 1);
     const dists = new Array(n + 1);
 
     dists.fill(Infinity, 0);
     dists[1] = 0;
-    minDists.add({ value: 0, vertex: 1 });
     visited.fill(false, 1);
 
-    const weightPath = (from, to) => roads[from][to];
     const pathFrom = (from) => roads[from];
-    const getMinDistantion = () => minDists.getMin();
+    const weightPath = (from, to) => (pathFrom(from) ? roads[from][to] : undefined);
+    const getMinTimes = () =>
+        dists.reduce((minIndex, v, i) => (dists[i] < dists[minIndex] && !visited[i] ? i : minIndex), 0);
 
     let minDistantion;
     let currentTime;
 
-    while (!minDists.isEmpty()) {
-        do {
-            minDistantion = getMinDistantion();
-        } while (visited[minDistantion.vertex] && !minDists.isEmpty());
+    for (let i = 1; i <= n; i++) {
+        minDistantion = getMinTimes();
+        if (minDistantion === 0 || minDistantion === n) break;
 
-        if (visited[minDistantion.vertex] && minDists.isEmpty()) break;
-        if (minDistantion.vertex === n) break;
+        visited[minDistantion] = true;
+        currentTime = dists[minDistantion];
 
-        visited[minDistantion.vertex] = true;
-        currentTime = dists[minDistantion.vertex];
-        for (let toVertex in pathFrom(minDistantion.vertex)) {
-            const buses = weightPath(minDistantion.vertex, toVertex);
-            for (const bus of buses) {
-                const { time, weight } = bus;
-
+        for (let j = 1; j <= n; j++) {
+            value = weightPath(minDistantion, j);
+            if (value) {
+                const { time, weight } = value;
                 if (
                     currentTime + time <= timeLimit &&
                     weight >= testingWeight &&
-                    dists[toVertex] >= currentTime + time &&
-                    !visited[toVertex]
+                    dists[j] >= currentTime + time &&
+                    !visited[j]
                 ) {
-                    dists[toVertex] = currentTime + time;
-                    minDists.add({ value: currentTime + time, vertex: toVertex });
+                    dists[j] = currentTime + time;
                 }
             }
         }
@@ -148,20 +70,19 @@ function testRelocation(n, roads, testingWeight) {
 }
 
 function cupsRelocation(n, mInit, arrInit) {
-    const roads = {};
+    if (n == 1 && mInit == 0) return 10000000;
+
+    const roads = [];
     let maxWeight = 0;
 
     const setWeight = (from, to, time, weight) => {
         weight = weight - 3000000;
         if (!roads[from]) {
-            roads[from] = {};
+            roads[from] = [];
         }
-        if (!roads[from][to]) {
-            roads[from][to] = [];
-        }
-        roads[from][to];
-        roads[from][to].push({ time, weight });
-        //maxWeight = Math.max(maxWeight, weight);
+
+        roads[from][to] = { time, weight };
+        maxWeight = Math.max(maxWeight, weight);
     };
 
     for (let i = 0; i < mInit; i++) {
@@ -170,7 +91,7 @@ function cupsRelocation(n, mInit, arrInit) {
     }
 
     let l = 0;
-    let r = 10 ** 9; //maxWeight + 1;
+    let r = maxWeight + 1;
     let m;
     while (l < r) {
         m = l + Math.ceil((r - l + 1) / 2);
@@ -186,7 +107,7 @@ function cupsRelocation(n, mInit, arrInit) {
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin,
+    input: process.stdin
 });
 
 const _inputLines = [];
