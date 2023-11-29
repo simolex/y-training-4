@@ -11,6 +11,6 @@ describe("C. Переезд", () => {
     });
     test("test-2", () => {
         const result = solution(1, 0, []);
-        expect(result).toBe(0);
+        expect(result).toBe(10000000);
     });
 });

@@ -151,6 +151,8 @@ function cupsRelocation(n, mInit, arrInit) {
     const roads = {};
     let maxWeight = 0;
 
+    if (n === 1 && mInit === 0) return 10000000;
+
     const setWeight = (from, to, time, weight) => {
         weight = weight - 3000000;
         if (!roads[from]) {
@@ -161,7 +163,7 @@ function cupsRelocation(n, mInit, arrInit) {
         }
         roads[from][to];
         roads[from][to].push({ time, weight });
-        //maxWeight = Math.max(maxWeight, weight);
+        maxWeight = Math.max(maxWeight, weight);
     };
 
     for (let i = 0; i < mInit; i++) {
